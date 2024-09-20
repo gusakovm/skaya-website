@@ -43,9 +43,12 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background-color: #9CA3AF;
+            background-color: #6B7280;
             border-radius: 50%;
             opacity: 0.2;
+            transition: opacity 0.2s ease;
+            margin-top: -1.5px;
+            margin-left: -1.5px;
         }
 
         main {
@@ -163,15 +166,45 @@
         .notification.show {
             transform: translateY(0);
         }
+
+        #spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #main-content {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="background-animation" id="background"></div>
-    <main>
+    <div id="spinner-container">
+        <div class="spinner"></div>
+    </div>
+    <main id="main-content">
         <div class="content">
             <img src="src/skaya.svg" alt="skaya.ai logo" class="logo">
-            <h1>AI for Large-Scale Data Processing</h1>
-            <p>Innovative Gen AI solutions with powerful APIs and custom LLM-driven data analysis</p>
+            <h1 id="mainTitle"></h1>
+            <p id="subTitle"></p>
             <form class="email-form" id="emailForm">
                 <input type="email" id="emailInput" class="email-input" placeholder="Your email" required>
                 <button type="submit" class="submit-button" id="submitButton" disabled>
@@ -264,8 +297,8 @@
         }
 
         function animateDot(dot) {
-            const duration = 5000 + Math.random() * 5000; // Уменьшили длительность анимации
-            const direction = Math.floor(Math.random() * 4); // 0: right, 1: down, 2: left, 3: up
+            const duration = 4000 + Math.random() * 4000;
+            const direction = Math.floor(Math.random() * 4);
             let xDistance = 0;
             let yDistance = 0;
 
@@ -285,6 +318,7 @@
                 direction: 'alternate',
                 easing: 'linear'
             });
+
         }
 
         // Пересоздание точек при изменении размера окна
@@ -294,6 +328,26 @@
                 createDot();
             }
         });
+
+        // Функция для загрузки текстов
+        function loadTexts() {
+            return fetch('https://appskaya.sfo2.digitaloceanspaces.com/websitelang/en.json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('mainTitle').textContent = data.H1;
+                    document.getElementById('subTitle').textContent = data.SubTitle;
+                    document.getElementById('spinner-container').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке текстов:', error);
+                    document.getElementById('spinner-container').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                });
+        }
+
+        // Загружаем тексты при загрузке страницы
+        window.addEventListener('load', loadTexts);
     </script>
 </body>
 </html>
