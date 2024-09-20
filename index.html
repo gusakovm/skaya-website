@@ -216,12 +216,8 @@
             submitButton.disabled = true;
 
             setTimeout(() => {
-                fetch('https://n8n.gusakov.com/webhook/skaya-website-input', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: email }),
+                fetch('https://n8n.gusakov.com/webhook-test/skaya-website-input?email=' + email, {
+                    method: 'GET'
                 })
                 .then(response => response.json())
                 .then(data => {
