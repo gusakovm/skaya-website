@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skaya | Large-Scale Data Processing</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="src/ficons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="src/ficons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="src/ficons/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="manifest" href="src/ficons/site.webmanifest">
+    <link rel="mask-icon" href="src/ficons/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #F9FAFB;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                linear-gradient(to right, #F3F4F6 1px, transparent 1px),
+                linear-gradient(to bottom, #F3F4F6 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #9CA3AF;
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        main {
+            text-align: center;
+            padding: 40px 20px;
+            z-index: 1;
+        }
+
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            width: 92px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #111;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        p {
+            color: #4B5563;
+            font-size: 1.2rem;
+            margin-bottom: 32px;
+        }
+        .email-form {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .email-input {
+            width: 100%;
+            padding: 20px;
+            padding-right: 60px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-family: 'Inter', Arial, sans-serif;
+            box-sizing: border-box;
+            background-color: #F3F4F6;
+            color: #1F2937;
+        }
+        .email-input::placeholder {
+            color: #9CA3AF;
+        }
+        .email-input:focus {
+            outline: 2px solid #1A56DB;
+            outline-offset: -2px;
+        }
+        @media (max-width: 768px) {
+            .email-input:focus {
+                outline: 2px solid #1A56DB;
+                outline-offset: -2px;
+            }
+        }
+
+        .submit-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            color: #1A56DB;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .submit-button svg {
+            width: 30px;
+            height: 30px;
+            fill: currentColor;
+        }
+        .submit-button .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #1A56DB;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .notification {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .notification.success {
+            background-color: #10B981;
+        }
+        .notification.error {
+            background-color: #F59E0B;
+        }
+        .notification.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation" id="background"></div>
+    <main>
+        <div class="content">
+            <img src="src/skaya.svg" alt="skaya.ai logo" class="logo">
+            <h1>AI for Large-Scale Data Processing</h1>
+            <p>Innovative Gen AI solutions with powerful APIs and custom LLM-driven data analysis</p>
+            <form class="email-form" id="emailForm">
+                <input type="email" id="emailInput" class="email-input" placeholder="Your email" required>
+                <button type="submit" class="submit-button" id="submitButton" disabled>
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+    </main>
+    <div id="notification" class="notification"></div>
+    <script>
+        const emailInput = document.getElementById('emailInput');
+        const submitButton = document.getElementById('submitButton');
+        const emailForm = document.getElementById('emailForm');
+        const notification = document.getElementById('notification');
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        emailInput.addEventListener('input', function() {
+            submitButton.disabled = !isValidEmail(this.value);
+        });
+
+        function showNotification(message, isSuccess) {
+            notification.textContent = message;
+            notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        emailForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = emailInput.value;
+            submitButton.querySelector('svg').style.display = 'none';
+            submitButton.querySelector('.spinner').style.display = 'block';
+            submitButton.disabled = true;
+
+            setTimeout(() => {
+                fetch('https://n8n.gusakov.com/webhook/skaya-website-input', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    showNotification('Thank you for subscribing!', true);
+                    emailInput.value = '';
+                    submitButton.disabled = true;  // Отключаем кнопку после очистки поля
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showNotification('An error occurred. Please try again later.', false);
+                })
+                .finally(() => {
+                    submitButton.querySelector('svg').style.display = 'block';
+                    submitButton.querySelector('.spinner').style.display = 'none';
+                    submitButton.disabled = !isValidEmail(emailInput.value);  // Проверяем валидность email после очистки
+                });
+            }, 700);
+        });
+
+        // Обновленная анимация фона
+        const background = document.getElementById('background');
+        const gridSize = 50; // Размер ячейки сетки
+        const dotCount = 200; // Количество точек
+
+        for (let i = 0; i < dotCount; i++) {
+            createDot();
+        }
+
+        function createDot() {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            positionDotOnGrid(dot);
+            background.appendChild(dot);
+
+            animateDot(dot);
+        }
+
+        function positionDotOnGrid(dot) {
+            const x = Math.floor(Math.random() * (window.innerWidth / gridSize)) * gridSize;
+            const y = Math.floor(Math.random() * (window.innerHeight / gridSize)) * gridSize;
+            dot.style.left = `${x}px`;
+            dot.style.top = `${y}px`;
+        }
+
+        function animateDot(dot) {
+            const duration = 5000 + Math.random() * 5000; // Уменьшили длительность анимации
+            const direction = Math.floor(Math.random() * 4); // 0: right, 1: down, 2: left, 3: up
+            let xDistance = 0;
+            let yDistance = 0;
+
+            switch (direction) {
+                case 0: xDistance = gridSize; break;
+                case 1: yDistance = gridSize; break;
+                case 2: xDistance = -gridSize; break;
+                case 3: yDistance = -gridSize; break;
+            }
+
+            dot.animate([
+                { transform: 'translate(0, 0)' },
+                { transform: `translate(${xDistance}px, ${yDistance}px)` }
+            ], {
+                duration: duration,
+                iterations: Infinity,
+                direction: 'alternate',
+                easing: 'linear'
+            });
+        }
+
+        // Пересоздание точек при изменении размера окна
+        window.addEventListener('resize', () => {
+            background.innerHTML = '';
+            for (let i = 0; i < dotCount; i++) {
+                createDot();
+            }
+        });
+    </script>
+</body>
+</html>
